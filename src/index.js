@@ -1,34 +1,32 @@
 // src/index.js
-
 import express from "express";
 import axios from "axios";
 import { getEventos } from "./ga4.js";
 
 const app = express();
-
-// ✅ Middleware para JSON (obrigatório para req.body)
 app.use(express.json());
 
-// Variáveis de ambiente GA4
+// ================================
+// ENV
+// ================================
 const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
 const GA4_API_SECRET = process.env.GA4_API_SECRET;
 
 // ================================
-// Rotas principais
+// ROTAS
 // ================================
 
-// Rota raiz
 app.get("/", (req, res) => {
   res.send("API rodando 🚀");
 });
 
-// Endpoint GA4 teste
+// 🔎 Teste de leitura GA4
 app.get("/ga4-test", async (req, res) => {
   try {
     const data = await getEventos(
-      "261098144",               // propertyId GA4
-      "7daysAgo",                // startDate
-      "today",                   // endDate
+      "261098144",
+      "7daysAgo",
+      "today",
       ["page_view", "session_start"]
     );
 
@@ -44,9 +42,15 @@ app.get("/ga4-test", async (req, res) => {
 });
 
 // ================================
-// Funções de geração de dados fake
+// FUNÇÕES AUXILIARES
 // ================================
 
+// client_id válido pro GA4
+function gerarClientId() {
+  return `${Math.floor(Math.random() * 1e9)}.${Date.now()}`;
+}
+
+// canais de tráfego
 function getTrafficSource() {
   const sources = [
     { source: "google", medium: "cpc", campaign: "campanha_pago" },
@@ -58,37 +62,39 @@ function getTrafficSource() {
   return sources[Math.floor(Math.random() * sources.length)];
 }
 
+// gera usuário fake completo
 function gerarUsuarioFake(id) {
   const sessionId = `${Date.now()}_${id}`;
   const traffic = getTrafficSource();
+
+  const baseParams = {
+    session_id: sessionId,
+    engagement_time_msec: 100,
+    debug_mode: true,
+    ...traffic
+  };
 
   const converteu = Math.random() > 0.6;
 
   const eventos = [
     {
       name: "session_start",
-      params: {
-        session_id: sessionId,
-        engagement_time_msec: 1,
-        ...traffic
-      }
+      params: baseParams
     },
     {
       name: "page_view",
       params: {
+        ...baseParams,
         page_location: "https://dunavideos.com.br/home",
-        page_title: "Home",
-        session_id: sessionId,
-        ...traffic
+        page_title: "Home"
       }
     },
     {
       name: "page_view",
       params: {
+        ...baseParams,
         page_location: "https://dunavideos.com.br/produto",
-        page_title: "Produto",
-        session_id: sessionId,
-        ...traffic
+        page_title: "Produto"
       }
     }
   ];
@@ -97,39 +103,42 @@ function gerarUsuarioFake(id) {
     eventos.push({
       name: "generate_lead",
       params: {
+        ...baseParams,
         value: Math.floor(Math.random() * 500),
-        currency: "BRL",
-        session_id: sessionId,
-        ...traffic
+        currency: "BRL"
       }
     });
   }
 
   return {
-    client_id: `user_${id}_${Date.now()}`,
+    client_id: gerarClientId(),
     events: eventos
   };
 }
 
+// envio com DEBUG (retorna erros do GA4)
 async function enviarParaGA4(payload) {
   if (!GA4_MEASUREMENT_ID || !GA4_API_SECRET) {
     throw new Error("GA4_MEASUREMENT_ID ou GA4_API_SECRET não definidos");
   }
 
-  const url = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
+  const url = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
 
   try {
-    await axios.post(url, payload);
+    const response = await axios.post(url, payload);
+
+    console.log("Resposta GA4:");
+    console.log(JSON.stringify(response.data, null, 2));
   } catch (error) {
     console.error("Erro ao enviar evento:", error.response?.data || error.message);
   }
 }
 
 // ================================
-// Endpoint para gerar dados fake
+// ENDPOINT GERADOR DE DADOS
 // ================================
 
-// POST para produção / API
+// POST (produção)
 app.post("/seed-ga4", async (req, res) => {
   const totalUsuarios = req.body?.total || 50;
 
@@ -153,9 +162,10 @@ app.post("/seed-ga4", async (req, res) => {
   }
 });
 
-// GET temporário para teste rápido no navegador
+// GET (teste rápido no navegador)
 app.get("/seed-ga4", async (req, res) => {
-  const totalUsuarios = 500; // número menor só pra teste
+  const totalUsuarios = 5;
+
   try {
     await Promise.all(
       Array.from({ length: totalUsuarios }).map((_, i) => {
@@ -163,6 +173,7 @@ app.get("/seed-ga4", async (req, res) => {
         return enviarParaGA4(payload);
       })
     );
+
     res.send(`Foram enviados ${totalUsuarios} usuários fake para GA4`);
   } catch (error) {
     res.status(500).send("Erro ao gerar dados");
@@ -170,9 +181,11 @@ app.get("/seed-ga4", async (req, res) => {
 });
 
 // ================================
-// Inicializa servidor
+// START SERVER
 // ================================
+
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
