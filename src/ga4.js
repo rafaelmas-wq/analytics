@@ -1,12 +1,10 @@
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
-import fs from "fs";
-
-const credentials = JSON.parse(
-  fs.readFileSync("./credentials.json", "utf-8")
-);
 
 const client = new BetaAnalyticsDataClient({
-  credentials,
+  credentials: {
+    client_email: process.env.GA4_CLIENT_EMAIL,
+    private_key: process.env.GA4_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  },
 });
 
 export async function getEventos(propertyId, startDate, endDate, events) {
@@ -27,7 +25,7 @@ export async function getEventos(propertyId, startDate, endDate, events) {
 
   const result = {};
 
-  response.rows.forEach((row) => {
+  response.rows?.forEach((row) => {
     const event = row.dimensionValues[0].value;
     const count = parseInt(row.metricValues[0].value);
     result[event] = count;
