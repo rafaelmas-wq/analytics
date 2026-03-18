@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 app.get("/ga4-test", async (req, res) => {
   try {
     const data = await getEventos(
-      "261098144",
+      "295716619",
       "7daysAgo",
       "today",
       ["page_view", "session_start"]
