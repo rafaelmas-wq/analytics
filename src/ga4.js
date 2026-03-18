@@ -2,8 +2,8 @@ import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
 const client = new BetaAnalyticsDataClient({
   credentials: {
-    client_email: process.env.CLIENT_EMAIL,
-    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email: process.env.GA4_CLIENT_EMAIL,
+    private_key: process.env.GA4_PRIVATE_KEY.replace(/\\n/g, "\n"),
   },
 });
 
