@@ -1,16 +1,4 @@
-import express from "express";
 
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("API rodando 🚀");
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
 import { getEventos } from "./ga4.js";
 
 app.get("/ga4-test", async (req, res) => {
