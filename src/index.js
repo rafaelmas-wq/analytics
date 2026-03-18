@@ -1,15 +1,3 @@
-<head>
-  <title>App analytics</title>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V5KBS6PRNL"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-V5KBS6PRNL');
-</script>
-</head>
-
 // src/index.js
 import express from "express";
 import axios from "axios";
