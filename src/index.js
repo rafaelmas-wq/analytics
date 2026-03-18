@@ -1,18 +1,31 @@
-
+import express from "express";
 import { getEventos } from "./ga4.js";
 
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("API rodando 🚀");
+});
+
+// 👉 NOVO ENDPOINT
 app.get("/ga4-test", async (req, res) => {
   try {
     const data = await getEventos(
-      "261098144",
-      "2021-01-01",
-      "2023-12-31",
-      ["page_view"]
+      "213025502", // ex: 123456789
+      "7daysAgo",
+      "today",
+      ["page_view", "session_start"]
     );
 
     res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Erro ao buscar GA4");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar dados do GA4" });
   }
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
