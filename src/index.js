@@ -33,7 +33,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
-const axios = require("axios");
+
+import axios from "axios";
 
 const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
 const GA4_API_SECRET = process.env.GA4_API_SECRET;
@@ -112,13 +113,15 @@ function gerarUsuarioFake(id) {
   };
 }
 app.post("/seed-ga4", async (req, res) => {
-  const totalUsuarios = req.body.total || 50;
+  const totalUsuarios = req.body?.total || 50;
 
   try {
-    for (let i = 0; i < totalUsuarios; i++) {
-      const payload = gerarUsuarioFake(i);
-      await enviarParaGA4(payload);
-    }
+    await Promise.all(
+      Array.from({ length: totalUsuarios }).map((_, i) => {
+        const payload = gerarUsuarioFake(i);
+        return enviarParaGA4(payload);
+      })
+    );
 
     res.json({
       status: "ok",
