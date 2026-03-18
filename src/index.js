@@ -1,30 +1,34 @@
 // src/index.js
 import express from "express";
 import axios from "axios";
-import { getEventos } from "./ga4.js"; // seu módulo GA4 já existente
-
-// Variáveis de ambiente
-const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
-const GA4_API_SECRET = process.env.GA4_API_SECRET;
+import { getEventos } from "./ga4.js";
 
 const app = express();
 
-// Middleware para JSON
+// ✅ Middleware para JSON (obrigatório para req.body)
 app.use(express.json());
 
-// ✅ Rota raiz
+// Variáveis de ambiente GA4
+const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
+const GA4_API_SECRET = process.env.GA4_API_SECRET;
+
+// ================================
+// Rotas principais
+// ================================
+
+// Rota raiz
 app.get("/", (req, res) => {
   res.send("API rodando 🚀");
 });
 
-// ✅ Endpoint GA4 teste
+// Endpoint GA4 teste
 app.get("/ga4-test", async (req, res) => {
   try {
     const data = await getEventos(
-      "261098144",          // propertyId GA4
-      "7daysAgo",           // startDate
-      "today",              // endDate
-      ["page_view", "session_start"] // eventos
+      "261098144",               // propertyId GA4
+      "7daysAgo",                // startDate
+      "today",                   // endDate
+      ["page_view", "session_start"]
     );
 
     res.json(data);
@@ -57,7 +61,7 @@ function gerarUsuarioFake(id) {
   const sessionId = `${Date.now()}_${id}`;
   const traffic = getTrafficSource();
 
-  const converteu = Math.random() > 0.6; // 60% chance de conversão
+  const converteu = Math.random() > 0.6;
 
   const eventos = [
     {
@@ -120,7 +124,11 @@ async function enviarParaGA4(payload) {
   }
 }
 
-// ✅ Endpoint para gerar dados fake
+// ================================
+// Endpoint para gerar dados fake
+// ================================
+
+// POST para produção / API
 app.post("/seed-ga4", async (req, res) => {
   const totalUsuarios = req.body?.total || 50;
 
@@ -144,12 +152,26 @@ app.post("/seed-ga4", async (req, res) => {
   }
 });
 
+// GET temporário para teste rápido no navegador
+app.get("/seed-ga4", async (req, res) => {
+  const totalUsuarios = 5; // número menor só pra teste
+  try {
+    await Promise.all(
+      Array.from({ length: totalUsuarios }).map((_, i) => {
+        const payload = gerarUsuarioFake(i);
+        return enviarParaGA4(payload);
+      })
+    );
+    res.send(`Foram enviados ${totalUsuarios} usuários fake para GA4`);
+  } catch (error) {
+    res.status(500).send("Erro ao gerar dados");
+  }
+});
+
 // ================================
 // Inicializa servidor
 // ================================
-
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
