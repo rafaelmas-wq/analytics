@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 app.get("/ga4-test", async (req, res) => {
   try {
     const data = await getEventos(
-      "213025502", // ex: 123456789
+      "261098144",
       "7daysAgo",
       "today",
       ["page_view", "session_start"]
@@ -19,8 +19,12 @@ app.get("/ga4-test", async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao buscar dados do GA4" });
+    console.error("ERRO REAL:", error);
+
+    res.status(500).json({
+      error: "Erro ao buscar dados do GA4",
+      detalhe: error.message,
+    });
   }
 });
 
