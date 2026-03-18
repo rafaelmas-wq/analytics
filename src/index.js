@@ -154,7 +154,7 @@ app.post("/seed-ga4", async (req, res) => {
 
 // GET temporário para teste rápido no navegador
 app.get("/seed-ga4", async (req, res) => {
-  const totalUsuarios = 5; // número menor só pra teste
+  const totalUsuarios = 500; // número menor só pra teste
   try {
     await Promise.all(
       Array.from({ length: totalUsuarios }).map((_, i) => {
