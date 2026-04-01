@@ -1,24 +1,10 @@
-// src/bigquery.js
-import { BigQuery } from "@google-cloud/bigquery";
-
-// 🔑 credenciais vindas do Railway
-const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-
-// 🔌 cliente BigQuery
-const bigquery = new BigQuery({
-  credentials,
-  projectId: credentials.project_id
-});
-
-// ================================
-// EVENTOS
-// ================================
-export async function getEventosBQ() {
+export async function getEventosBQ(startDate, endDate) {
   const query = `
     SELECT
       event_name,
       COUNT(*) as total
     FROM \`bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*\`
+    WHERE _TABLE_SUFFIX BETWEEN '${startDate}' AND '${endDate}'
     GROUP BY event_name
     ORDER BY total DESC
     LIMIT 10
@@ -27,15 +13,12 @@ export async function getEventosBQ() {
   const [rows] = await bigquery.query(query);
   return rows;
 }
-
-// ================================
-// DASHBOARD COMPLETO
-// ================================
-export async function getDashboardCompletoBQ() {
+export async function getDashboardCompletoBQ(startDate, endDate) {
   const query = `
     WITH base AS (
       SELECT *
       FROM \`bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*\`
+      WHERE _TABLE_SUFFIX BETWEEN '${startDate}' AND '${endDate}'
     ),
 
     overview AS (
@@ -105,7 +88,6 @@ export async function getDashboardCompletoBQ() {
   const [rows] = await bigquery.query(query);
   const data = rows[0];
 
-  // 🔥 calcula taxa de conversão
   const funnelMap = {};
   data.funnel.forEach(f => {
     funnelMap[f.event_name] = f.total;

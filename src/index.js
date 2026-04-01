@@ -21,8 +21,12 @@ app.get("/", (req, res) => {
 // ================================
 app.get("/bq/events", async (req, res) => {
   try {
-    const data = await getEventosBQ();
-    res.json(data);
+    const start = req.query.start || "20210101";
+    const end = req.query.end || "20210131";
+
+    const data = await getEventosBQ(start, end);
+
+    res.json({ start, end, data });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -37,8 +41,12 @@ app.get("/bq/events", async (req, res) => {
 // ================================
 app.get("/bq/dashboard", async (req, res) => {
   try {
-    const data = await getDashboardCompletoBQ();
-    res.json(data);
+    const start = req.query.start || "20210101";
+    const end = req.query.end || "20210131";
+
+    const data = await getDashboardCompletoBQ(start, end);
+
+    res.json({ start, end, ...data });
   } catch (error) {
     console.error(error);
     res.status(500).json({
