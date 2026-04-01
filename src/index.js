@@ -201,3 +201,17 @@ app.get("/bq/events", async (req, res) => {
     });
   }
 });
+import { getDashboardCompletoBQ } from "./bigquery.js";
+
+app.get("/bq/dashboard", async (req, res) => {
+  try {
+    const data = await getDashboardCompletoBQ();
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      erro: "Erro no dashboard",
+      detalhe: error.message
+    });
+  }
+});
