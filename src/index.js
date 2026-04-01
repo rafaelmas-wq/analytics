@@ -2,7 +2,7 @@
 import express from "express";
 import axios from "axios";
 import { getEventos } from "./ga4.js";
-import { getEventosBQ } from "./bigquery.js";
+import { getDashboardCompletoBQ } from "./bigquery.js";
 const app = express();
 app.use(express.json());
 
