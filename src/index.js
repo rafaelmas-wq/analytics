@@ -2,7 +2,7 @@
 import express from "express";
 import axios from "axios";
 import { getEventos } from "./ga4.js";
-
+import { getEventosBQ } from "./bigquery.js";
 const app = express();
 app.use(express.json());
 
@@ -188,4 +188,16 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+});
+app.get("/bq/events", async (req, res) => {
+  try {
+    const data = await getEventosBQ();
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      erro: "Erro ao consultar BigQuery",
+      detalhe: error.message
+    });
+  }
 });
