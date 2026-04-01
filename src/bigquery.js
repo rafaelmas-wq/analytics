@@ -1,3 +1,14 @@
+import { BigQuery } from "@google-cloud/bigquery";
+
+// 🔑 pega credenciais do Railway
+const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+
+// 🔌 cria cliente BigQuery
+const bigquery = new BigQuery({
+  credentials,
+  projectId: credentials.project_id
+});
+
 export async function getEventosBQ(startDate, endDate) {
   const query = `
     SELECT
