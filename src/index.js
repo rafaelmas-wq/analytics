@@ -201,7 +201,7 @@ app.get("/bq/events", async (req, res) => {
     });
   }
 });
-import { getDashboardCompletoBQ } from "./bigquery.js";
+
 
 app.get("/bq/dashboard", async (req, res) => {
   try {
