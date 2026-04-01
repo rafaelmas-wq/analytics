@@ -1,3 +1,16 @@
+app.get("/bq/events", async (req, res) => {
+  try {
+    const data = await getEventosBQ();
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      erro: "Erro ao consultar BigQuery",
+      detalhe: error.message
+    });
+  }
+});
+
 export async function getDashboardCompletoBQ() {
   const query = `
     WITH base AS (
